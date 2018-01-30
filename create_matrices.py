@@ -627,4 +627,3 @@ if __name__ == "__main__":
 
     print json.dumps(create_matrices(rel_loc, args.main_folder, args.temp_folder, 
 					ind_loc, args.epis, args.dom, args.hh, args.verbose), indent=4)
-
