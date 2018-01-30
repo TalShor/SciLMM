@@ -379,9 +379,6 @@ def simulate_phenotype(matrices_paths, cov_path, sigmas, fixed_effects):
 
 
 def compute_sigmas(matrices_paths, y_loc, cov_path=None, reml=True, sim_num=100, pc_num=0, verbose=False):
-
-	#TODO: haven't checked the new pc version yet...
-
 	ds = Data(matrices_paths, y_loc, reml, verbose=verbose, cov_loc=cov_path, pc_num=pc_num)
 	x0 = np.random.random(ds.num_matrices); x0 /= x0.sum()
         x0 = np.log(x0)
@@ -408,9 +405,6 @@ def compute_sigmas(matrices_paths, y_loc, cov_path=None, reml=True, sim_num=100,
 	he = lmm.compute_HE(True)
         he_time = datetime.now() - he_time
 
-
-	#optObj_bfgs_he = optimize.minimize(lmm.bolt_gradient_estimation, he, args=(reml, verbose), jac=True, method='L-BFGS-B', options={'eps':1e-5, 'ftol':1e-6 })
-
 	# so it is a standad JSON object
 	return {"bolt_sigmas":list(value),
 		"bolt_sigmas_time":bolt_time.total_seconds(),
@@ -421,7 +415,6 @@ def compute_sigmas(matrices_paths, y_loc, cov_path=None, reml=True, sim_num=100,
 		"bolt_sig_of_sig_time":sig_calc_time.total_seconds(),
 		"he_sigmas":list(he),
 		"he_time":he_time.total_seconds()}
-		#"bolt_sigmas_from_he":list(np.exp(optObj_bfgs_he.x))}
 
 
 if __name__ == '__main__':
@@ -443,35 +436,4 @@ if __name__ == '__main__':
 	print json.dumps(compute_sigmas(args.matrices, args.y_path, 
 		cov_path=args.cov_path, reml=args.reml, pc_num=args.pc_num,
 		sim_num=args.sim_num, verbose=args.verbose), indent=4)
-
-
- 	#reml, pca, sim_num, tree_size = args.reml, args.pca, args.sim_num, args.tree_size
- 	#epis, dom, hh = args.epis, args.dom, args.hh
-
-
-	# B. randomize y_v beforehand like BOLT-REML
-
-	#import os
-	#name = "tree2"
-	#fold = "DataSets/" + name
-	#if not os.path.exists(fold):
-	#	os.mkdir(fold)
-	#os.system("python simulate_trees.py --tree_size " + str(tree_size) + " --exp_rate 1.5 --gens 7 --name " + fold + "/tree")
-	#os.system("python create_matrices.py --rel_mat " + fold + "/tree.npz --name " + name + " --no-dom --no-epis --no-hh")
-	#os.system("cp /home/oogabooga/talshor/" + name + "/NumeratorMatrix.npz "  + fold)
-	#os.system("rm -r /home/oogabooga/talshor/" + name)
-
-	# ibd_mat_loc = fold + "/NumeratorMatrix.npz"
-	#main_mat = load_sparse_csr(ibd_mat_loc)[:4000][:, :4000]
-	# test_matrix(ibd_mat_loc)
-
-
-	#def test_matrix(ibd_mat_loc):	
-
-	#	y = simulate_phenotype([ibd_mat_loc], [], [0.3], [0.5])
-	#	y_loc = "DataSets/sample/y_sigma_g_0.3_intercept_0.5.npy"
-	#	np.save(y_loc, y)
-	#	import json
-	#	print json.dumps(run([ibd_mat_loc], y_loc, True), indent=4)
-	
 
