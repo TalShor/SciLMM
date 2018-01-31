@@ -5,12 +5,7 @@ simple example:
 python create_matrices.py --epis --dom --main_folder . --temp_folder .
 python compute_heritability.py --reml --matrices_paths_list ./NumeratorMatrix.npz ./EpistatisMatrix.npz ./DominanceMatrix.npz --phenotype_path ./y.npy
 
-This example creates the following pedigree (taken from http://www.genetic-genealogy.co.uk/Toc115570135.htmlhttp://www.genetic-genealogy.co.uk/Toc115570135.html)
-    2 \
-0 - 3 - 6 - 8
-  x       x
-1 - 4 - 7 - 9
-    5 /
+This example creates the following pedigree (the first example taken from http://www.genetic-genealogy.co.uk/Toc115570135.htmlhttp://www.genetic-genealogy.co.uk/Toc115570135.html)
 Creates the numerator/epistasis/dominance matrices for only [7, 8, 9].
 Generates phenotypes and computes HE and REML for it.
 
