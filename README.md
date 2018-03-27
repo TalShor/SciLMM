@@ -1,5 +1,23 @@
-# SciLMM
+# Sci-LMM
 Sparse Cholesky factorIzation Linear Mixed model
+
+## generate pedigree
+SimulatePedigrees.py - creates 3 files. 
+1. rel.npz - a compressed csr_matrix representing a pedigree via an adjacency matrix. can be loaded via load_sparse_csr
+2. sex.npy - generated sex (0/1) for the pedigree
+3. gen_ind.npy - each individual's generation (e.g. if you wish to generate yob for the pedigree)
+
+### parameters
+--sample_size - Size of the cohort
+--sparsity_factor - Number of nonzero entries in the IBD matrix'
+--gen_exp - Gen size = gen_exp X prev gen size
+--init_keep_rate - 1 - number of edges to remove before iteration begins')
+--save_folder - which folder it should save the output to
+
+### example
+python --sample_size 100000 --sparsity_factor 0.001 --gen_exp 1.4 --init_keep_rate 0.8 --save_folder Examples/100K
+
+
 
 simple example:
 python create_matrices.py --epis --dom --main_folder . --temp_folder .
