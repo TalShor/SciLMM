@@ -19,7 +19,7 @@ python --sample_size 100000 --sparsity_factor 0.001 --gen_exp 1.4 --init_keep_ra
 
 
 
-simple example:
+## Create covariance matrices
 python create_matrices.py --epis --dom --main_folder . --temp_folder .
 python compute_heritability.py --reml --matrices_paths_list ./NumeratorMatrix.npz ./EpistatisMatrix.npz ./DominanceMatrix.npz --phenotype_path ./y.npy
 
@@ -38,6 +38,7 @@ create_matrices.py arguments
 --verbose - verbose output.
 
 
+## Compute heritability
 compute_heritability.py arguments
 --reml - when finding the maximum likelihood, take the restricted maximum likelihood.
 --sim_num - number of vectors to simulate in-order to approximate the covarinace matrix (see Loh. 2015)
