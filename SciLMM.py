@@ -1,4 +1,4 @@
-from FileFormats.FAM import translate_fam
+from FileFormats.FAM import read_fam, write_fam
 from Simulation.Pedigree import simulate_tree
 from Matrices.Numerator import simple_numerator
 from Matrices.Dominance import dominance
@@ -8,13 +8,14 @@ from Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
 from Estimation.HE import compute_HE
 from Estimation.LMM import LMM ,SparseCholesky
 import numpy as np
-
+import argparse
+from Simulation.Phenotype import simulate_phenotype
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SciLMM')
 
     # simulation values
-    parser.add_argument('simulate', dest='simulate', action='store_true', default=False,
+    parser.add_argument('--simulate', dest='simulate', action='store_true', default=False,
                         help='Run simulations')
     parser.add_argument('--sample_size', dest='sample_size', type=int, default=100000,
                         help='Size of the cohort')
@@ -37,15 +38,18 @@ if __name__ == "__main__":
     parser.add_argument('--Dominance', dest='dom', action='store_true', default=False,
                         help='Create dominance matrix')
 
-    parser.add_argument('--IBD_path', dest='ibd_path', type=str, default=None,
-                        help='location of the .npz file for the IBD matrix ' + \
+    parser.add_argument('--IBD_exists', dest='ibd_path', action='store_true', default=False,
+                        help='existence of the .npz file for the IBD matrix ' + \
                              '(if you already had build the matrix via the --IBD option)')
-    parser.add_argument('--Epis_path', dest='epis_path', type=str, default=None,
-                        help='location of the .npz file for the Epistasis matrix ' + \
+    parser.add_argument('--Epis_exists', dest='epis_path', action='store_true', default=False,
+                        help='existence of the .npz file for the Epistasis matrix ' + \
                              '(if you already had build the matrix via the --Epistasis option)')
-    parser.add_argument('--Dom_path', dest='dom_path', type=str, default=None,
-                        help='location of the .npz file for the Dominance matrix ' + \
+    parser.add_argument('--Dom_exists', dest='dom_path', action='store_true', default=False,
+                        help='existence of the .npz file for the Dominance matrix ' + \
                              '(if you already had build the matrix via the --Dominance option)')
+
+    parser.add_argument('--generate_y', dest='gen_y', action='store_true', default=False,
+                        help='Generate a random y')
 
     parser.add_argument('--y', dest='y', type=str, default=None,
                         help='the phenotype (npy file containing an n sized numpy array)')
@@ -74,9 +78,13 @@ if __name__ == "__main__":
         if not os.path.exists(args.output_folder):
             raise Exception("The output folder does not exists")
 
+    if args.he or args.lmm:
+        if args.y is None and args.gen_y is False:
+            raise Exception("Can't estimate without a target value (--y)")
+
     rel = None
     if args.fam:
-        rel, sex, interest = translate_fam(args.fam)
+        rel, sex, interest = read_fam(args.fam)
     elif args.simulate:
         if args.sample_size <= 0:
             raise Exception("Sample size should be a positive number")
@@ -88,6 +96,7 @@ if __name__ == "__main__":
             raise Exception("init_keep_rate is within the range (0, 1)")
         rel, sex, _ = simulate_tree(args.sample_size, args.sparsity_factor,
                                     args.gen_exp, args.init_keep_rate)
+        write_fam(os.path.join(args.output_folder, "rel.fam"), rel, sex, None)
 
     ibd, epis, dom = None, None, None
     if args.ibd_path:
@@ -95,8 +104,11 @@ if __name__ == "__main__":
     elif args.ibd:
         if rel is None:
             raise Exception("No relationship matrix given")
-        ibd = simple_numerator(rel)
+        ibd, L, D = simple_numerator(rel)
+        
         save_sparse_csr(os.path.join(args.output_folder, "IBD.npz"), ibd)
+        save_sparse_csr(os.path.join(args.output_folder, "L.npz"), L)
+        save_sparse_csr(os.path.join(args.output_folder, "D.npz"), D)
 
     if args.epis_path:
         epis = load_sparse_csr(os.path.join(args.output_folder, "Epistasis.npz"))
@@ -104,7 +116,7 @@ if __name__ == "__main__":
         if ibd is None:
             raise Exception("Pairwise-epistasis requires an ibd matrix")
         epis = pairwise_epistasis(ibd)
-        save_sparse_csr(os.path.join(args.output_folder, "Epis.npz"), epis)
+        save_sparse_csr(os.path.join(args.output_folder, "Epistasis.npz"), epis)
 
     if args.dom_path:
         dom = load_sparse_csr(os.path.join(args.output_folder, "Dominance.npz"))
@@ -119,21 +131,23 @@ if __name__ == "__main__":
         if mat is not None:
             covariance_matrices.append(mat)
 
-    if args.HE or args.LMM:
-        if args.y is None:
-            raise Exception("Can't estimate without a target value (--y)")
-
     cov = sex[:, np.newaxis]
     if args.cov is not None:
         cov = np.hstack((cov, np.load(args.cov)))
 
     y = None
+    if args.gen_y:
+        sigs = np.random.rand(len(covariance_matrices) + 1); sigs /= sigs.sum()
+        fe = np.random.rand(cov.shape[1] + args.intercept) / 100
+        print("Generating y with fixed effects: {} and sigmas : {}".format(fe, sigs))
+        y = simulate_phenotype(covariance_matrices, cov, sigs, fe, args.intercept)
+        np.save(os.path.join(args.output_folder, "y.npy"), y)
     if args.y is not None:
         y = np.load(args.y)
 
-    if args.HE:
+    if args.he:
         print(compute_HE(y, cov, covariance_matrices, args.intercept))
 
-    if args.LMM:
+    if args.lmm:
         print(LMM(SparseCholesky(), covariance_matrices, cov, y,
                   with_intercept=args.intercept, reml=args.reml, sim_num=args.sim_num))
