@@ -1,6 +1,5 @@
 from scipy.sparse import csr_matrix
 import numpy as np
-from SparseFunctions import save_sparse_csr
 
 def example1():
     #       0
@@ -159,13 +158,13 @@ def henderson_example():
     rel[6, 4] = rel[6, 5] = 1
 
     real = csr_matrix((7,7))
-    real[0,0] = 1; real[0,2] = real[0,3] = real[0,4] = 0.5; real[0,5] = 0.75; real[0,6] = 0.625
-    real[1,1] = 1; real[1,3] = 0.5; real[1,4] = real[1,5] = real[1.6] = 0.25
-    real[2,2] = 1; real[2,3] = 0.25; real[2,4] = 0.625; real[2,5] = 0.375; real[2,6] = 0.5
-    real[3,3] = 1; real[3,4] = 0.625; real[3,5] = 0.75; real[3,6] = 0.6875
-    real[4,4] = 1.125; real[4,5] = 0.5625; real[4,6] = 0.84375
-    real[5,5] = 1.25; real[5,6] = 0.90625
-    real[6,6] = 1.28125
+    real[0, 0] = 1; real[0, 2] = real[0, 3] = real[0, 4] = 0.5; real[0, 5] = 0.75; real[0, 6] = 0.625
+    real[1, 1] = 1; real[1, 3] = 0.5; real[1, 4] = real[1, 5] = real[1, 6] = 0.25
+    real[2, 2] = 1; real[2, 3] = 0.25; real[2, 4] = 0.625; real[2, 5] = 0.375; real[2, 6] = 0.5
+    real[3, 3] = 1; real[3, 4] = 0.625; real[3, 5] = 0.75; real[3, 6] = 0.6875
+    real[4, 4] = 1.125; real[4, 5] = 0.5625; real[4, 6] = 0.84375
+    real[5, 5] = 1.25; real[5, 6] = 0.90625
+    real[6, 6] = 1.28125
 
     for i in range(7):
         for j in range(i+1, 7):
@@ -223,8 +222,3 @@ def lecture_example():
 	for pc in parents:
 		rel[pc[0], pc[1]] = 1
 	return rel.astype(np.bool)
-
-
-if __name__ == "__main__":
-	rel = lecture_example()
-	save_sparse_csr("DataSets/funckeduptree.npz", rel)
