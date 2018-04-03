@@ -6,8 +6,8 @@ from scipy.sparse import csr_matrix
 # phenotype is our indices of interest.
 # 0 - not of interest, 1 - is of interest.
 # all 0 equals to all are of interest
-def translate_fam(file_path):
-    df = pd.read_csv(file_path, delimiter=' ', dtype=str,
+def read_fam(fam_file_path):
+    df = pd.read_csv(fam_file_path, delimiter=' ', dtype=str,
                      names=['FID', 'IID', 'F_IID', 'M_IID', 'sex', 'phenotype'])
 
     # add the family id to all the ids (avoids duplicates)
@@ -42,4 +42,35 @@ def translate_fam(file_path):
 
     return rel, sex, interest
 
-print translate_fam('temp.fam')
+
+def write_fam(fam_file_path, rel, sex, indices):
+    sex = sex.astype(np.bool)
+    individuals, parents = rel.nonzero()
+
+    fathers = np.zeros((rel.shape[0]), dtype=np.int32)
+    mothers = np.zeros((rel.shape[0]), dtype=np.int32)
+    interest = np.zeros((rel.shape[0]), dtype=np.int32)
+    # need to add one so 0 is not an entry
+    fathers[individuals[sex[parents]]] = parents[sex[parents]] + 1
+    mothers[individuals[~sex[parents]]] = parents[~sex[parents]] + 1
+    if indices is not None:
+        interest[indices] = True
+    content = np.vstack((np.zeros((rel.shape[0]), dtype=np.int32),
+                         np.arange(rel.shape[0]) + 1,
+                         fathers, mothers,
+                         ['2' if x else '1' for x in sex],
+                         interest))
+    np.savetxt(fam_file_path, content.T, delimiter=' ', fmt='%s')
+
+
+if __name__ == "__main__":
+    from Simulation.Pedigree import simulate_tree
+    rel, sex, _ = simulate_tree(10000, 0.001, 1.4, 0.9)
+    indices = np.array([1,2,3])
+    write_fam('temp.fam', rel, sex, indices)
+
+    rel_after, sex_after, interest_after = read_fam('temp.fam')
+    assert (rel_after - rel).nnz == 0
+    assert np.count_nonzero(sex - sex_after) == 0
+    assert np.count_nonzero(interest_after - indices) == 0
+
