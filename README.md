@@ -19,7 +19,7 @@ Sparse Cholesky factorIzation Linear Mixed model
 
 `--gen_exp GEN_EXP`  - Gen size = gen_exp X prev gen size
 
-`--init_keep_rate INIT_KEEP_RATE - 1 - number of edges to remove before iteration begins
+`--init_keep_rate INIT_KEEP_RATE` - 1 - number of edges to remove before iteration begins
 
 `--fam FAM` - .fam file representing the pedigree. the phenotype column contains all 0 if everyone is of interest, or if only a subset is of interest the're phenotype will contain 1
 
