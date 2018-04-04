@@ -65,7 +65,7 @@ mkdir Examples/100K_2
 
 python SciLMM.py --simulate --sample_size 100000 --sparsity_factor 0.001 --output_folder Examples/100K_2 --IBD --Epistasis --generate_y --HE --LMM --REML --fit_intercept
 
-python SciLMM.py`--output_folder Examples/100K_2 --fam Examples/100K_2/rel.fam --IBD_exists --Epis_exists --y Examples/100K_2/y.npy`--HE --LMM --REML --fit_intercept
+python SciLMM.py --output_folder Examples/100K_2 --fam Examples/100K_2/rel.fam --IBD_exists --Epis_exists --y Examples/100K_2/y.npy --HE --LMM --REML --fit_intercept
 ```
 
 
