@@ -98,4 +98,6 @@ note that the dominance matrix lowers the percision of the results by quite a lo
 ## Tips
 For anything bigger than 200K-250K individuals, I prefer HE. It's really really really fast, pretty accurate, and you don't have to mess around with the CHOLMOD library.
 
+Creating IBD matrices for 2-3 million individuals works great, from some reason - 11 million involves large numerical errors - will update on this when I understand this better.
+
 If needed, please contact Tal Shor at talihow@gmail.com.
