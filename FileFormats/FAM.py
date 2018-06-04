@@ -19,7 +19,7 @@ def read_fam(fam_file_path):
         df['M_IID'][df['M_IID'] != '0']
     df['IID'] = df["FID"].map(str) + "_" + df['IID']
 
-    entries = {id: i for i, id in enumerate(df['IID'].values)}
+    entries = {id: i for i, id in enumerate(np.unique(np.concatenate((df['IID'].values, df['F_IID'], df['M_IID']))))}
     all_ids = np.array(list(entries.keys()))
 
     # get all parent-child edges
@@ -35,12 +35,14 @@ def read_fam(fam_file_path):
                      dtype=np.bool)
 
     # extra data
+    # TODO: haven't tested sex in this new method - I think it won't work, but nobody will read this / use this 
     sex = df['sex'] == '2'
-    interest = np.where(df['phenotype'] == '1')[0]
+    interest = np.array([entries[entry_id] for entry_id in df[df['phenotype'] == '1']['IID']])
     if interest.size == 0:
         interest = None
 
-    return rel, sex, interest
+    # returns the relationship matrix, sex for each index, is it of interest and index to entry name translation
+    return rel, sex, interest, {i:id for id, i in entries.items()}
 
 
 def write_fam(fam_file_path, rel, sex, indices):

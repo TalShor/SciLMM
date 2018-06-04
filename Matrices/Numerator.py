@@ -2,7 +2,7 @@ import numpy as np
 from scipy.sparse import lil_matrix, csr_matrix
 
 
-def LD(rel):
+def LD(rel, return_inbreeding_coefficient=False):
     ancestors_list = np.split(rel.indices, rel.indptr[1:-1])
     n = rel.shape[0]
     L = lil_matrix((n, n))
@@ -27,8 +27,11 @@ def LD(rel):
 
     D_full = csr_matrix((n, n))
     D_full[np.arange(n), np.arange(n)] = D
+    L = L.tocsr()
 
-    return L.tocsr(), D_full
+    if return_inbreeding_coefficient:
+        return L, D_full, F
+    return L, D_full
 
 
 def create_numerator(L, D):
