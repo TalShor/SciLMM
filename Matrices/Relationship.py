@@ -5,7 +5,7 @@ from scipy.sparse import eye
 
 def topo_sort(rel):
     graph = nx.DiGraph(rel)
-    sort_order = np.array(nx.topological_sort(graph, reverse=True))
+    sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
 
 
@@ -49,17 +49,18 @@ def get_only_relevant_indices(rel, subset):
     return relevant_subset, np.searchsorted(relevant_subset, subset)
 
 
-# TODO: test this. nothing here has been tested.
 # indices should be sorted
 def organize_rel(rel, subset=None):
     rel, topo_order = topo_sort(rel)
-    subset_in_topo_order = np.argsort(topo_order)[subset]
+    topo_order_argsort = np.argsort(topo_order)
     if subset is not None:
+        # TODO: check this again. do it with unique ids
+        subset_in_topo_order = topo_order_argsort[subset]
         relevant_subset, subset_in_relevant_subset = \
             get_only_relevant_indices(rel, subset_in_topo_order)
         return rel[relevant_subset][:, relevant_subset],\
                subset_in_relevant_subset
-    return rel, topo_order_argsort
+    return rel, topo_order
 
 
 if __name__ == "__main__":

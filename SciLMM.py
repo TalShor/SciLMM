@@ -3,7 +3,7 @@ from Simulation.Pedigree import simulate_tree
 from Matrices.Numerator import simple_numerator
 from Matrices.Dominance import dominance
 from Matrices.Epistasis import pairwise_epistasis
-from Matrices.Relationship import get_only_relevant_indices
+from Matrices.Relationship import organize_rel
 import os
 from Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
 from Estimation.HE import compute_HE
@@ -83,16 +83,13 @@ if __name__ == "__main__":
         if args.y is None and args.gen_y is False:
             raise Exception("Can't estimate without a target value (--y)")
 
-    rel, relevant = None, None
+    rel, interest_in_relevant = None, None
     if args.fam:
-        rel, sex, interest, entries_dict = read_fam(args.fam)
-        # there is no need for the rest of the indices if we have a non-trivial interest
-        if interest is not None:
-            relevant, interest_in_relevant = get_only_relevant_indices(rel, interest)
-            rel = rel[relevant][:, relevant]
-            sex = sex[relevant]
-            entries_list = [entries_dict[ind] for ind in relevant[interest_in_relevant]]
-            np.save(os.path.join(args.output_folder, "entires_ids.npy"), entries_list)
+        rel_org, sex, interest, entries_dict = read_fam(args.fam)
+        rel, interest_in_relevant = organize_rel(rel_org, interest)
+        # TODO: have to do sex as well in this version
+        entries_list = np.array(list(entries_dict.values()))[interest_in_relevant]
+        np.save(os.path.join(args.output_folder, "entires_ids.npy"), entries_list)
     elif args.simulate:
         if args.sample_size <= 0:
             raise Exception("Sample size should be a positive number")
@@ -107,7 +104,7 @@ if __name__ == "__main__":
         write_fam(os.path.join(args.output_folder, "rel.fam"), rel, sex, None)
    
     # if no subset of interest has been specified, keep all indices
-    if relevant is None:
+    if interest_in_relevant is None:
         interest_in_relevant = np.ones((rel.shape[0])).astype(np.bool)
     ibd, epis, dom = None, None, None
     if args.ibd_path:
@@ -117,7 +114,7 @@ if __name__ == "__main__":
             raise Exception("No relationship matrix given")
         ibd, L, D = simple_numerator(rel)
         # keep the original L and D because they are useless otherwise 
-        save_sparse_csr(os.path.join(args.output_folder, "IBD.npz"), ibd[interest_in_relevant][:, interest_in_relevant])
+        save_sparse_csr(os.path.join(args.output_folder, "IBD.npz"), ibd)
         save_sparse_csr(os.path.join(args.output_folder, "L.npz"), L)
         save_sparse_csr(os.path.join(args.output_folder, "D.npz"), D)
 
@@ -127,7 +124,7 @@ if __name__ == "__main__":
         if ibd is None:
             raise Exception("Pairwise-epistasis requires an ibd matrix")
         epis = pairwise_epistasis(ibd)
-        save_sparse_csr(os.path.join(args.output_folder, "Epistasis.npz"), epis[interest_in_relevant][:, interest_in_relevant])
+        save_sparse_csr(os.path.join(args.output_folder, "Epistasis.npz"), epis)
 
     if args.dom_path:
         dom = load_sparse_csr(os.path.join(args.output_folder, "Dominance.npz"))
@@ -135,7 +132,7 @@ if __name__ == "__main__":
         if ibd is None or rel is None:
             raise Exception("Dominance requires both an ibd matrix and a relationship matrix")
         dom = dominance(rel, ibd)
-        save_sparse_csr(os.path.join(args.output_folder, "Dominance.npz"), dom[interest_in_relevant][:, interest_in_relevant])
+        save_sparse_csr(os.path.join(args.output_folder, "Dominance.npz"), dom)
 
     covariance_matrices = []
     for mat in [ibd, epis, dom]:
