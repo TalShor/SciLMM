@@ -89,7 +89,7 @@ if __name__ == "__main__":
         rel, interest_in_relevant = organize_rel(rel_org, interest)
         # TODO: have to do sex as well in this version
         entries_list = np.array(list(entries_dict.values()))[interest_in_relevant]
-        np.save(os.path.join(args.output_folder, "entires_ids.npy"), entries_list)
+        np.save(os.path.join(args.output_folder, "entries_ids.npy"), entries_list)
     elif args.simulate:
         if args.sample_size <= 0:
             raise Exception("Sample size should be a positive number")
