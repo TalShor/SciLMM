@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: scilmm
+Version: 0.1
+Summary: Sparse Cholesky factorIzation Linear Mixed model
+Home-page: http://github.com/kalkairis/SciLMM.git
+Author: TalShor
+Author-email: talihow@gmail.com
+License: GNU
+Description: UNKNOWN
+Platform: UNKNOWN

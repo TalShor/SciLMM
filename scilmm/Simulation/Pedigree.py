@@ -3,8 +3,8 @@ import itertools
 from scipy.sparse import csr_matrix, triu, eye
 from scipy.optimize import fmin
 import argparse
-from Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
-from Matrices.Relationship import count_IBD_nonzero
+from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
+from scilmm.Matrices.Relationship import count_IBD_nonzero
 
 
 # number of individuals per generation so that each generation is gen_exp bigger than the previous

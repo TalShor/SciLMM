@@ -1,0 +1,7 @@
+README.md
+scilmm/SciLMM.py
+scilmm.egg-info/PKG-INFO
+scilmm.egg-info/SOURCES.txt
+scilmm.egg-info/dependency_links.txt
+scilmm.egg-info/not-zip-safe
+scilmm.egg-info/top_level.txt

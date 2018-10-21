@@ -1,18 +1,18 @@
-from FileFormats.FAM import read_fam, write_fam
-from Simulation.Pedigree import simulate_tree
-from Matrices.Numerator import simple_numerator
-from Matrices.Dominance import dominance
-from Matrices.Epistasis import pairwise_epistasis
-from Matrices.Relationship import organize_rel
+from .FileFormats.FAM import read_fam, write_fam
+from .Simulation.Pedigree import simulate_tree
+from .Matrices.Numerator import simple_numerator
+from .Matrices.Dominance import dominance
+from .Matrices.Epistasis import pairwise_epistasis
+from .Matrices.Relationship import organize_rel
 import os
-from Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
-from Estimation.HE import compute_HE
-from Estimation.LMM import LMM ,SparseCholesky
+from .Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
+from .Estimation.HE import compute_HE
+from .Estimation.LMM import LMM ,SparseCholesky
 import numpy as np
 import argparse
-from Simulation.Phenotype import simulate_phenotype
+from .Simulation.Phenotype import simulate_phenotype
 
-if __name__ == "__main__":
+def parse_arguments():
     parser = argparse.ArgumentParser(description='SciLMM')
 
     # simulation values
@@ -75,6 +75,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    return args
+
+def main(args):
     if args.ibd or args.epis or args.dom:
         if not os.path.exists(args.output_folder):
             raise Exception("The output folder does not exists")
@@ -159,3 +162,7 @@ if __name__ == "__main__":
     if args.lmm:
         print(LMM(SparseCholesky(), covariance_matrices, cov, y,
                   with_intercept=args.intercept, reml=args.reml, sim_num=args.sim_num))
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
