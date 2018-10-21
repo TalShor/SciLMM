@@ -1,1 +1,1 @@
-from .SciLMM import main
+from .SciLMM import *
