@@ -3,14 +3,24 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 
-# phenotype is our indices of interest.
-# 0 - not of interest, 1 - is of interest.
-# all 0 equals to all are of interest
 def read_fam(fam_file_path):
+    """
+    Reading a .fam family file (this is also a csv file)
+    :param fam_file_path: Path to family file, delimiter of this file is ' '
+        Note that the family file should have the following columns (all strings):
+        - FID: Family ID. This is not a unique ID for an individual.
+        - IID: individual's ID
+        - F_IID: father IID, IID of '0' is defined as null.
+        - M_IID: mother IID, IID of '0' is defined as null.
+        - sex: individual's sex. Should appear as ####
+        - phenotype: Should appear as 0 if not of interest, 1 if of interest.
+            If all are 0's then all individuals are of interest.
+    :return:
+    """
     df = pd.read_csv(fam_file_path, delimiter=' ', dtype=str,
                      names=['FID', 'IID', 'F_IID', 'M_IID', 'sex', 'phenotype'])
 
-    # add the family id to all the ids (avoids duplicates)
+    # add family id to all the ids in order to avoids duplicates
     df['F_IID'][df['F_IID'] != '0'] = \
         df["FID"][df['F_IID'] != '0'].map(str) + "_" + \
         df['F_IID'][df['F_IID'] != '0']
