@@ -4,6 +4,11 @@ from scipy.sparse import eye
 
 
 def topo_sort(rel):
+    """
+    Sort relationship csr_matrix by ancestry order.
+    :param rel: relationship csr_matrix
+    :return: Sorted relationship csr_matrix, sort_order
+    """
     graph = nx.DiGraph(rel)
     sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
@@ -11,6 +16,11 @@ def topo_sort(rel):
 
 # ancestor matrix
 def get_AM(rel):
+    """
+    Get Ancestor Matrix
+    :param rel: relationship csr_matrix
+    :return:
+    """
     am = rel
     temp_mat = rel
     while temp_mat.nnz > 0:
