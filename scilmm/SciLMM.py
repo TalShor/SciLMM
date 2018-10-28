@@ -31,7 +31,7 @@ def parse_arguments():
     parser.add_argument('--fam', dest='fam', type=str, default=None,
                         help='.fam file representing the pedigree. ' +
                              'the phenotype column contains all 0 if everyone is of interest, ' +
-                             'or if only a subset is of interest the\'re phenotype will contain 1')
+                             'or if only a subset is of interest their phenotype will contain 1')
 
     parser.add_argument('--IBD', dest='ibd', action='store_true', default=False,
                         help='Create IBD matrix')
@@ -112,7 +112,7 @@ def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam,
     # if no subset of interest has been specified, keep all indices
     if interest_in_relevant is None:
         interest_in_relevant = np.ones((rel.shape[0])).astype(np.bool)
-    ibd, epis, dom = None, None, None
+
     if ibd_path:
         ibd = load_sparse_csr(os.path.join(output_folder, "IBD.npz"))
     elif ibd:
@@ -123,6 +123,8 @@ def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam,
         save_sparse_csr(os.path.join(output_folder, "IBD.npz"), ibd)
         save_sparse_csr(os.path.join(output_folder, "L.npz"), L)
         save_sparse_csr(os.path.join(output_folder, "D.npz"), D)
+    else:
+        ibd = None
 
     if epis_path:
         epis = load_sparse_csr(os.path.join(output_folder, "Epistasis.npz"))
@@ -131,6 +133,8 @@ def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam,
             raise Exception("Pairwise-epistasis requires an ibd matrix")
         epis = pairwise_epistasis(ibd)
         save_sparse_csr(os.path.join(output_folder, "Epistasis.npz"), epis)
+    else:
+        epis = None
 
     if dom_path:
         dom = load_sparse_csr(os.path.join(output_folder, "Dominance.npz"))
@@ -139,15 +143,18 @@ def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam,
             raise Exception("Dominance requires both an ibd matrix and a relationship matrix")
         dom = dominance(rel, ibd)
         save_sparse_csr(os.path.join(output_folder, "Dominance.npz"), dom)
+    else:
+        dom = None
 
     covariance_matrices = []
     for mat in [ibd, epis, dom]:
         if mat is not None:
             covariance_matrices.append(mat)
 
-    cov = sex[:, np.newaxis]
     if cov is not None:
         cov = np.hstack((cov, np.load(cov)))
+    else:
+        cov = sex[:, np.newaxis]
 
     y = None
     if gen_y:
