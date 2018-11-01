@@ -27,3 +27,10 @@ class TestSciLMM(TestCase):
         ibd = load_sparse_csr(os.path.join(self.output_folder, "IBD.npz"))
         assert_equal(ibd[(np.argwhere(entries_list=='0_9')[0][0], np.argwhere(entries_list=='0_8')[0][0])], 0.25)
         assert_equal(ibd[(np.argwhere(entries_list == '0_3')[0][0], np.argwhere(entries_list == '0_4')[0][0])], 0.5)
+
+    def test_more_than_two_parents(self):
+        SciLMM(fam=os.path.join(self.output_folder, 'too_many_parents.fam'), output_folder=self.output_folder,
+               ibd=True)
+        entries_list = np.load(os.path.join(self.output_folder, "entries_ids.npy"))
+        ibd = load_sparse_csr(os.path.join(self.output_folder, "IBD.npz"))
+        pass

@@ -3,7 +3,7 @@ import numpy as np
 from scipy.sparse import eye
 
 
-def topo_sort(rel, remove_cycles=False):
+def topo_sort(rel, remove_cycles=False, check_num_parents=False):
     """
     Sort relationship csr_matrix by ancestry order.
     :param rel: relationship csr_matrix
@@ -12,8 +12,12 @@ def topo_sort(rel, remove_cycles=False):
     graph = nx.DiGraph(rel)
     if remove_cycles:
         cycle_iids = nx.algorithms.cycles.recursive_simple_cycles(graph)
+        # TODO: this should be removal of edges not of nodes
         if len(cycle_iids) > 0:
             graph.remove_nodes_from(np.hstack(cycle_iids).flatten())
+    if check_num_parents:
+        # TODO: 
+        pass
     sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
 
@@ -63,8 +67,8 @@ def get_only_relevant_indices(rel, subset):
 
 
 # indices should be sorted
-def organize_rel(rel, subset=None, remove_cycles=False):
-    rel, topo_order = topo_sort(rel, remove_cycles=remove_cycles)
+def organize_rel(rel, subset=None, remove_cycles=False, check_num_parents=False):
+    rel, topo_order = topo_sort(rel, remove_cycles=remove_cycles, check_num_parents=check_num_parents)
     topo_order_argsort = np.argsort(topo_order)
     if subset is not None:
         # TODO: check this again. do it with unique ids

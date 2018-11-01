@@ -39,6 +39,11 @@ def parse_arguments():
                         help='Remove cycles from relationship matrix.' +
                              'WARNING: there should no be any cycles. All nodes in cycles will be removed.')
 
+    parser.add_argument('--remove_access_parents', dest='check_num_parents', action='store_true', default=False,
+                        help='Remove relations of nodes with too many parents.' +
+                             'WARNING: All individuals should have no more than 2 parents.' +
+                             'Access edges will be removed, not nodes.')
+
     parser.add_argument('--IBD', dest='ibd', action='store_true', default=False,
                         help='Create IBD matrix')
     parser.add_argument('--Epistasis', dest='epis', action='store_true', default=False,
@@ -88,7 +93,7 @@ def parse_arguments():
 def SciLMM(simulate=False, sample_size=100000, sparsity_factor=0.001, gen_exp=1.4, init_keep_rate=0.8, fam=None,
            ibd=False, epis=False, dom=False, ibd_path=False, epis_path=False,
            dom_path=False, gen_y=False, y=None, cov=None, he=False, lmm=False, reml=False, sim_num=100, intercept=False,
-           verbose=False, output_folder='.', remove_cycles=False):
+           verbose=False, output_folder='.', remove_cycles=False, check_num_parents=False):
     if ibd or epis or dom:
         if not os.path.exists(output_folder):
             raise Exception("The output folder does not exists")
