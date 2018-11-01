@@ -3,19 +3,22 @@ import numpy as np
 from scipy.sparse import eye
 
 
-def topo_sort(rel):
+def topo_sort(rel, remove_cycles=False):
     """
     Sort relationship csr_matrix by ancestry order.
     :param rel: relationship csr_matrix
     :return: Sorted relationship csr_matrix, sort_order
     """
     graph = nx.DiGraph(rel)
+    if remove_cycles:
+        cycle_iids = nx.algorithms.cycles.recursive_simple_cycles(graph)
+        if len(cycle_iids) > 0:
+            graph.remove_nodes_from(np.hstack(cycle_iids).flatten())
     sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
 
 
-# ancestor matrix
-def get_AM(rel):
+def get_ancestor_matrix(rel):
     """
     Get Ancestor Matrix
     :param rel: relationship csr_matrix
@@ -38,11 +41,11 @@ def get_CAM(AM):
 
 # use the CAM matrix to see how many nonzero entries IBD has (much faster than computing IBD each time)
 def count_IBD_nonzero(rel):
-    return get_CAM(get_AM(rel)).nnz
+    return get_CAM(get_ancestor_matrix(rel)).nnz
 
 
 def get_only_relevant_indices(rel, subset):
-    AM = get_AM(rel)
+    AM = get_ancestor_matrix(rel)
     with_ancestors = np.unique(np.concatenate((subset,
                                                AM[subset].nonzero()[1])))
 
@@ -60,23 +63,22 @@ def get_only_relevant_indices(rel, subset):
 
 
 # indices should be sorted
-def organize_rel(rel, subset=None):
-    rel, topo_order = topo_sort(rel)
+def organize_rel(rel, subset=None, remove_cycles=False):
+    rel, topo_order = topo_sort(rel, remove_cycles=remove_cycles)
     topo_order_argsort = np.argsort(topo_order)
     if subset is not None:
         # TODO: check this again. do it with unique ids
         subset_in_topo_order = topo_order_argsort[subset]
         relevant_subset, subset_in_relevant_subset = \
             get_only_relevant_indices(rel, subset_in_topo_order)
-        return rel[relevant_subset][:, relevant_subset],\
-               subset_in_relevant_subset
+        return rel[relevant_subset][:, relevant_subset], subset_in_relevant_subset
     return rel, topo_order
 
 
 if __name__ == "__main__":
-    from Examples.GraphExamples import henderson_example, cam_example
-    from Matrices.Numerator import simple_numerator
-    from Simulation.Pedigree import simulate_tree
+    from ..Examples.GraphExamples import henderson_example, cam_example
+    from ..Matrices.Numerator import simple_numerator
+    from ..Simulation.Pedigree import simulate_tree
 
     rel, _, _, _ = henderson_example()
     print(topo_sort(rel))
@@ -96,7 +98,6 @@ if __name__ == "__main__":
     rel, _, _ = simulate_tree(10000, 0.001, 1.4, 0.9)
     subset = np.sort(np.random.choice(np.arange(10000), size=500, replace=False))
 
-
     relevant_subset, _ = get_only_relevant_indices(rel, subset)
 
     relevant_ibd, _, _ = simple_numerator(rel[relevant_subset][:, relevant_subset])
@@ -107,9 +108,6 @@ if __name__ == "__main__":
     ibd2 = full_ibd[subset][:, subset]
 
     assert (ibd1 - ibd2).nnz == 0
-
-
-
 
     shuffle = np.arange(10000)
     np.random.shuffle(shuffle)
@@ -132,6 +130,3 @@ if __name__ == "__main__":
     assert (sub_ibd1 - sub_ibd3).nnz == 0
 
     assert (sub_ibd1 - sub_ibd2).nnz == 0
-
-
-

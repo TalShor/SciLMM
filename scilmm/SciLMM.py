@@ -33,6 +33,10 @@ def parse_arguments():
                              'the phenotype column contains all 0 if everyone is of interest, ' +
                              'or if only a subset is of interest their phenotype will contain 1')
 
+    parser.add_argument('--remove_cycles', dest='remove_cycles', action='store_true', default=False,
+                        help='Remove cycles from relationship matrix.' +
+                             'WARNING: there should no be any cycles. All nodes in cycles will be removed.')
+
     parser.add_argument('--IBD', dest='ibd', action='store_true', default=False,
                         help='Create IBD matrix')
     parser.add_argument('--Epistasis', dest='epis', action='store_true', default=False,
@@ -79,8 +83,10 @@ def parse_arguments():
     return args
 
 
-def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam, ibd, epis, dom, ibd_path, epis_path,
-           dom_path, gen_y, y, cov, he, lmm, reml, sim_num, intercept, verbose, output_folder):
+def SciLMM(simulate=False, sample_size=100000, sparsity_factor=0.001, gen_exp=1.4, init_keep_rate=0.8, fam=None,
+           ibd=False, epis=False, dom=False, ibd_path=False, epis_path=False,
+           dom_path=False, gen_y=False, y=None, cov=None, he=False, lmm=False, reml=False, sim_num=100, intercept=False,
+           verbose=False, output_folder='.', remove_cycles=False):
     if ibd or epis or dom:
         if not os.path.exists(output_folder):
             raise Exception("The output folder does not exists")
@@ -92,7 +98,7 @@ def SciLMM(simulate, sample_size, sparsity_factor, gen_exp, init_keep_rate, fam,
     rel, interest_in_relevant = None, None
     if fam:
         rel_org, sex, interest, entries_dict = read_fam(fam)
-        rel, interest_in_relevant = organize_rel(rel_org, interest)
+        rel, interest_in_relevant = organize_rel(rel_org, interest, remove_cycles=remove_cycles)
         # TODO: have to do sex as well in this version
         entries_list = np.array(list(entries_dict.values()))[interest_in_relevant]
         np.save(os.path.join(output_folder, "entries_ids.npy"), entries_list)
