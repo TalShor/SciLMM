@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from scipy.sparse import csr_matrix
 
 
@@ -52,7 +52,7 @@ def read_fam(fam_file_path):
         interest = None
 
     # returns the relationship matrix, sex for each index, is it of interest and index to entry name translation
-    return rel, sex, interest, {i:id for id, i in entries.items()}
+    return rel, sex, interest, {i: id for id, i in entries.items()}
 
 
 def write_fam(fam_file_path, rel, sex, indices):
@@ -77,12 +77,12 @@ def write_fam(fam_file_path, rel, sex, indices):
 
 if __name__ == "__main__":
     from Simulation.Pedigree import simulate_tree
+
     rel, sex, _ = simulate_tree(10000, 0.001, 1.4, 0.9)
-    indices = np.array([1,2,3])
+    indices = np.array([1, 2, 3])
     write_fam('temp.fam', rel, sex, indices)
 
     rel_after, sex_after, interest_after = read_fam('temp.fam')
     assert (rel_after - rel).nnz == 0
     assert np.count_nonzero(sex - sex_after) == 0
     assert np.count_nonzero(interest_after - indices) == 0
-

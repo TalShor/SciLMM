@@ -1,10 +1,11 @@
+import os
 from unittest import TestCase
-from networkx.exception import NetworkXUnfeasible
+
 import numpy as np
+from networkx.exception import NetworkXUnfeasible
 from nose.tools import assert_raises, assert_equal
 
 from scilmm import SciLMM, load_sparse_csr
-import os
 
 
 class TestSciLMM(TestCase):

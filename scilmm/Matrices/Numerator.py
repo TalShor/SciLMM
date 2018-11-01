@@ -51,6 +51,7 @@ def selective_numerator(L, D, indices):
 if __name__ == "__main__":
     # Validate
     from Examples.GraphExamples import henderson_example
+
     rel, real, L, D = henderson_example()
     newL, newD_squared = LD(rel)
     assert ((L - newL).nnz == 0) and (np.sqrt(newD_squared) - D).max() < 0.00001
@@ -59,6 +60,7 @@ if __name__ == "__main__":
     # Test time
     print("Simulate pedigree")
     from Simulation.Pedigree import simulate_tree
+
     rel, _, _ = simulate_tree(100000, 0.001, 1.4, 0.9)
     print("Computing LD")
     bigL, bigD_squared = LD(rel)

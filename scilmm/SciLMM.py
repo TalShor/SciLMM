@@ -1,15 +1,17 @@
-from scilmm.FileFormats.FAM import read_fam, write_fam
-from scilmm.Simulation.Pedigree import simulate_tree
-from scilmm.Matrices.Numerator import simple_numerator
-from scilmm.Matrices.Dominance import dominance
-from scilmm.Matrices.Epistasis import pairwise_epistasis
-from scilmm.Matrices.Relationship import organize_rel
+import argparse
 import os
-from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
+
+import numpy as np
+
 from scilmm.Estimation.HE import compute_HE
 from scilmm.Estimation.LMM import LMM, SparseCholesky
-import numpy as np
-import argparse
+from scilmm.FileFormats.FAM import read_fam, write_fam
+from scilmm.Matrices.Dominance import dominance
+from scilmm.Matrices.Epistasis import pairwise_epistasis
+from scilmm.Matrices.Numerator import simple_numerator
+from scilmm.Matrices.Relationship import organize_rel
+from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
+from scilmm.Simulation.Pedigree import simulate_tree
 from scilmm.Simulation.Phenotype import simulate_phenotype
 
 

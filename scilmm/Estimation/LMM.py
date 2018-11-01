@@ -1,11 +1,12 @@
+import time
+from itertools import combinations_with_replacement
+
 import numpy as np
-import scipy.stats as stats
 import scipy.linalg as la
 import scipy.optimize as optimize
-import time
-from sksparse.cholmod import cholesky as sk_choleksy
-from itertools import combinations_with_replacement
+import scipy.stats as stats
 from scipy.sparse import eye
+from sksparse.cholmod import cholesky as sk_choleksy
 
 np.set_printoptions(precision=4, linewidth=200)
 
@@ -21,7 +22,6 @@ class SparseCholesky(object):
                            use_long=self._use_long,
                            mode=self._mode,
                            ordering_method=self._ordering_method)
-
 
 
 def compute_fixed_effects(factor, y, covariates):
@@ -112,7 +112,7 @@ def bolt_gradient_estimation(log_sig2g_array, cholesky, mats, covariates, y, rem
 
 def compute_sigmas(cholesky, mats, covariates, y, reml=True, sim_num=100, verbose=True):
     # randomly choose a valid starting point
-    x0 = np.ones((len(mats)))# = np.random.random(len(mats));
+    x0 = np.ones((len(mats)))  # = np.random.random(len(mats));
     x0 = np.log(x0 / x0.sum())
 
     # minimize the likelihood (REML or not)
@@ -186,4 +186,4 @@ if __name__ == "__main__":
                            np.array([0.3, 0.2, 0.1, 0.4]),
                            np.array([0.01, 0.02, 0.03]),
                            True)
-    print (LMM(SparseCholesky(), [ibd, epis, dom], cov, y))
+    print(LMM(SparseCholesky(), [ibd, epis, dom], cov, y))

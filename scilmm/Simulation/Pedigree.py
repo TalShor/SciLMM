@@ -1,15 +1,18 @@
-import numpy as np
-import itertools
-from scipy.sparse import csr_matrix, triu, eye
-from scipy.optimize import fmin
 import argparse
-from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr, save_sparse_csr
+import itertools
+
+import numpy as np
+from scipy.optimize import fmin
+from scipy.sparse import csr_matrix, triu
+
 from scilmm.Matrices.Relationship import count_IBD_nonzero
+from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr
 
 
 # number of individuals per generation so that each generation is gen_exp bigger than the previous
 def generation_size(sample_size, gen_exp):
-    gens = np.array(list(map(lambda x: int(2 * (gen_exp ** x)), range(int(np.log(sample_size * gen_exp)/np.log(gen_exp))))))
+    gens = np.array(
+        list(map(lambda x: int(2 * (gen_exp ** x)), range(int(np.log(sample_size * gen_exp) / np.log(gen_exp))))))
     enough_gens = np.where(np.cumsum(gens) > sample_size)[0][0]
     return gens[:enough_gens].tolist() + [sample_size - gens[:enough_gens].sum()]
 
@@ -32,7 +35,7 @@ def households(generation, prev_generation):
     # first half will be sex1, second half is sex2
     same_generation = zip(np.random.choice(generation[:half_gen], int(gen_size * 0.8 * 0.68)),
                           np.random.choice(generation[half_gen:], int(gen_size * 0.8 * 0.68)))
-    same_generation = [[x,y] for x,y in same_generation if x != y]
+    same_generation = [[x, y] for x, y in same_generation if x != y]
     if prev_generation is None:
         return np.array(single_parents + same_generation)
 
@@ -40,9 +43,9 @@ def households(generation, prev_generation):
     prev_gen_size = prev_generation.size
     half_prev_gen = int(prev_gen_size / 2)
     mix_generations = list(zip(np.random.choice(generation[:half_gen], int(gen_size * 0.2 * 0.68 * 0.5)),
-                          np.random.choice(prev_generation[half_prev_gen:], int(gen_size * 0.2 * 0.68 * 0.5))))
+                               np.random.choice(prev_generation[half_prev_gen:], int(gen_size * 0.2 * 0.68 * 0.5))))
     mix_generations += list(zip(np.random.choice(prev_generation[:half_prev_gen], int(gen_size * 0.2 * 0.68 * 0.5)),
-                          np.random.choice(generation[half_gen:], int(gen_size * 0.2 * 0.68 * 0.5))))
+                                np.random.choice(generation[half_gen:], int(gen_size * 0.2 * 0.68 * 0.5))))
     mix_generations = [[x, y] for x, y in mix_generations if x != y]
     return np.array(single_parents + same_generation + mix_generations)
 
@@ -52,7 +55,7 @@ def combine_ind_to_households(generations, remove_rate):
     all_child_parent = []
     for i in range(1, len(generations)):
         hh = households(generations[i - 1], None if i == 1 else generations[i - 2])
-        trios = zip(generations[i], hh[np.random.choice(hh.shape[0], generations[i].size)]) #hh[]
+        trios = zip(generations[i], hh[np.random.choice(hh.shape[0], generations[i].size)])  # hh[]
         child_parent = [[[child, parent] for parent in parents] for child, parents in trios]
         all_child_parent.append(list(itertools.chain(*child_parent)))
     all_child_parent = np.array(list(itertools.chain(*all_child_parent)))
@@ -140,13 +143,10 @@ if __name__ == "__main__":
     if (args.init_keep_rate <= 0) or (args.init_keep_rate > 1):
         raise Exception("init_keep_rate is within the range (0, 1)")
 
-
     rel = load_sparse_csr('rel.npz')
     print(count_IBD_nonzero(rel))
 
-
-    #rel, sex, gen_ind = simulate_tree(args.sample_size, args.sparsity_factor, args.gen_exp, args.init_keep_rate)
-    #save_sparse_csr(os.path.join(args.save_folder, 'rel.npz'), rel)
-    #np.save(os.path.join(args.save_folder, 'sex.npy'), sex)
-    #np.save(os.path.join(args.save_folder, 'gen_ind.npy'), gen_ind)
-
+    # rel, sex, gen_ind = simulate_tree(args.sample_size, args.sparsity_factor, args.gen_exp, args.init_keep_rate)
+    # save_sparse_csr(os.path.join(args.save_folder, 'rel.npz'), rel)
+    # np.save(os.path.join(args.save_folder, 'sex.npy'), sex)
+    # np.save(os.path.join(args.save_folder, 'gen_ind.npy'), gen_ind)

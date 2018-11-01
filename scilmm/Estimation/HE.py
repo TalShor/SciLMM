@@ -1,7 +1,8 @@
-from sklearn import linear_model
+from itertools import product
+
 import numpy as np
 from scipy.sparse import eye
-from itertools import product
+from sklearn import linear_model
 
 
 def regress_beta_out(y, covariates, fit_intercept):

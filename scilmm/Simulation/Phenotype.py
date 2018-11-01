@@ -1,5 +1,5 @@
-from sksparse.cholmod import cholesky
 import numpy as np
+from sksparse.cholmod import cholesky
 
 
 def simulate_phenotype(covariance_matrices, covariate_matrix, sigmas, fixed_effects, add_intercept=False):
@@ -9,7 +9,7 @@ def simulate_phenotype(covariance_matrices, covariate_matrix, sigmas, fixed_effe
     factors = [cholesky(mat) for mat in covariance_matrices]
     sim = [factor.L().dot(np.random.randn(n)) for i, factor in enumerate(factors)]
     sim = [sim[i][np.argsort(factor.P())] for i, factor in enumerate(factors)]
-    sim += [np.random.randn(n)] # simulating I
+    sim += [np.random.randn(n)]  # simulating I
     sim = np.array(sim).T
     sim = (sim - sim.mean(axis=0)) / sim.std(axis=0)
     y = sim.dot(np.sqrt(np.array(sigmas)))

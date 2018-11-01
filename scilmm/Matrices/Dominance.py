@@ -32,9 +32,9 @@ def dominance(rel, ibd):
                         ibd_with_root[i_parents[:, 1], j_parents[:, 0]].A1)
     dominance_values *= 0.25
     dom_mat = csr_matrix((dominance_values,
-                            ibd_with_root.indices,
-                            ibd_with_root.indptr),
-                           shape=ibd_with_root.shape)
+                          ibd_with_root.indices,
+                          ibd_with_root.indptr),
+                         shape=ibd_with_root.shape)
 
     # remove root
     dom_mat = dom_mat[1:][:, 1:]
@@ -43,10 +43,9 @@ def dominance(rel, ibd):
     return dom_mat.tocsr()
 
 
-
-
 if __name__ == "__main__":
     from Examples.GraphExamples import henderson_example
+
     rel, ibd, L, D = henderson_example()
     print(dominance(rel, ibd))
 
