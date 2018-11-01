@@ -29,7 +29,8 @@ def read_fam(fam_file_path):
         df['M_IID'][df['M_IID'] != '0']
     df['IID'] = df["FID"].map(str) + "_" + df['IID']
 
-    entries = {id: i for i, id in enumerate(np.unique(np.concatenate((df['IID'].values, df['F_IID'], df['M_IID']))))}
+    entries = {id: i for i, id in
+               enumerate([x for x in np.unique(np.concatenate(df[['IID', 'F_IID', 'M_IID']].values)) if '_' in x])}
     all_ids = np.array(list(entries.keys()))
 
     # get all parent-child edges
