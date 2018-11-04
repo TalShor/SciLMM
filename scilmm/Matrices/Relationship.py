@@ -1,3 +1,5 @@
+from itertools import chain
+
 import networkx as nx
 import numpy as np
 from scipy.sparse import eye
@@ -7,17 +9,27 @@ def topo_sort(rel, remove_cycles=False, check_num_parents=False):
     """
     Sort relationship csr_matrix by ancestry order.
     :param rel: relationship csr_matrix
+    :param remove_cycles: boolean of whether to check for and remove cycles (unfeasible).
+    :param check_num_parents: boolean of whether to check for and remove cases of more than 2 parents (unfeasible).
     :return: Sorted relationship csr_matrix, sort_order
     """
     graph = nx.DiGraph(rel)
     if remove_cycles:
         cycle_iids = nx.algorithms.cycles.recursive_simple_cycles(graph)
-        # TODO: this should be removal of edges not of nodes
         if len(cycle_iids) > 0:
-            graph.remove_nodes_from(np.hstack(cycle_iids).flatten())
+            edges_to_remove = list(
+                map(lambda cyc: list(map(lambda i: (cyc[i], cyc[(i + 1) % len(cyc)]), range(len(cyc)))), cycle_iids))
+            edges_to_remove = list(chain.from_iterable(edges_to_remove))
+            graph.remove_edges_from(edges_to_remove)
+            graph.remove_nodes_from(list(nx.isolates(graph)))
     if check_num_parents:
-        # TODO: 
-        pass
+        nodes_with_access_parents = list(map(lambda x: x[0], (filter(lambda x: x[1] > 2, graph.out_degree()))))
+        edges_to_remove = np.vstack(np.array(list(
+            map(lambda child: np.array(list(map(lambda succ: (child, succ), list(graph.successors(child))))),
+                nodes_with_access_parents))))
+        graph.remove_edges_from(edges_to_remove)
+        graph.remove_nodes_from(list(nx.isolates(graph)))
+    # TODO: consider having a list of elements to remove and only remove them after checking for violations.
     sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
 

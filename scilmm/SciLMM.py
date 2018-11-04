@@ -105,7 +105,8 @@ def SciLMM(simulate=False, sample_size=100000, sparsity_factor=0.001, gen_exp=1.
     rel, interest_in_relevant = None, None
     if fam:
         rel_org, sex, interest, entries_dict = read_fam(fam)
-        rel, interest_in_relevant = organize_rel(rel_org, interest, remove_cycles=remove_cycles)
+        rel, interest_in_relevant = organize_rel(rel_org, interest, remove_cycles=remove_cycles,
+                                                 check_num_parents=check_num_parents)
         # TODO: have to do sex as well in this version
         entries_list = np.array(list(entries_dict.values()))[interest_in_relevant]
         np.save(os.path.join(output_folder, "entries_ids.npy"), entries_list)
