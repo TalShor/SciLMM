@@ -24,11 +24,12 @@ def topo_sort(rel, remove_cycles=False, check_num_parents=False):
             graph.remove_nodes_from(list(nx.isolates(graph)))
     if check_num_parents:
         nodes_with_access_parents = list(map(lambda x: x[0], (filter(lambda x: x[1] > 2, graph.out_degree()))))
-        edges_to_remove = np.vstack(np.array(list(
-            map(lambda child: np.array(list(map(lambda succ: (child, succ), list(graph.successors(child))))),
-                nodes_with_access_parents))))
-        graph.remove_edges_from(edges_to_remove)
-        graph.remove_nodes_from(list(nx.isolates(graph)))
+        if len(nodes_with_access_parents)>0:
+            edges_to_remove = np.vstack(np.array(list(
+                map(lambda child: np.array(list(map(lambda succ: (child, succ), list(graph.successors(child))))),
+                    nodes_with_access_parents))))
+            graph.remove_edges_from(edges_to_remove)
+            graph.remove_nodes_from(list(nx.isolates(graph)))
     # TODO: consider having a list of elements to remove and only remove them after checking for violations.
     sort_order = np.array(list(nx.topological_sort(graph)))[::-1]
     return rel[sort_order][:, sort_order], sort_order
