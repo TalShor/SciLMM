@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 
 
-def read_fam(fam_file_path):
+def read_fam(fam_file_path=None, fam=None):
     """
     Reading a .fam family file (this is also a csv file)
     :param fam_file_path: Path to family file, delimiter of this file is ' '
@@ -15,10 +15,14 @@ def read_fam(fam_file_path):
         - sex: individual's sex. Should appear as ####
         - phenotype: Should appear as 0 if not of interest, 1 if of interest.
             If all are 0's then all individuals are of interest.
+    :param fam: The actual pandas DataFrame of the familiy file.
     :return:
     """
-    df = pd.read_csv(fam_file_path, delimiter=' ', dtype=str,
-                     names=['FID', 'IID', 'F_IID', 'M_IID', 'sex', 'phenotype'])
+    if fam is None:
+        df = pd.read_csv(fam_file_path, delimiter=' ', dtype=str,
+                         names=['FID', 'IID', 'F_IID', 'M_IID', 'sex', 'phenotype'])
+    else:
+        df = fam.copy()
 
     # add family id to all the ids in order to avoids duplicates
     df['F_IID'][df['F_IID'] != '0'] = \
