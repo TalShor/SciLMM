@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='scilmm',
       version='0.1',
@@ -7,5 +7,5 @@ setup(name='scilmm',
       author='TalShor',
       author_email='talihow@gmail.com',
       license='GNU',
-      packages=['scilmm'],
+      packages=find_packages(),
       zip_safe=False)
