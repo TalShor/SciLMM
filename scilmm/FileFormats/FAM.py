@@ -3,12 +3,12 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 
 
-def read_fam(fam_file_path=None, fam=None):
+def read_fam(fam_file_path=None, fam=None, null_value='0'):
     """
     Reading a .fam family file (this is also a csv file)
     :param fam_file_path: Path to family file, delimiter of this file is ' '
         Note that the family file should have the following columns (all strings):
-        - FID: Family ID. This is not a unique ID for an individual.
+        - FID: Family ID. This is not a unique ID for an individual. [optional]
         - IID: individual's ID
         - F_IID: father IID, IID of '0' is defined as null.
         - M_IID: mother IID, IID of '0' is defined as null.
@@ -25,16 +25,29 @@ def read_fam(fam_file_path=None, fam=None):
         df = fam.copy()
 
     # add family id to all the ids in order to avoids duplicates
-    df['F_IID'][df['F_IID'] != '0'] = \
-        df["FID"][df['F_IID'] != '0'].map(str) + "_" + \
-        df['F_IID'][df['F_IID'] != '0']
-    df['M_IID'][df['M_IID'] != '0'] = \
-        df["FID"][df['M_IID'] != '0'].map(str) + "_" + \
-        df['M_IID'][df['M_IID'] != '0']
-    df['IID'] = df["FID"].map(str) + "_" + df['IID']
+    if 'FID' in df.columns:
+        if null_value:
+            df['F_IID'][df['F_IID'] != null_value] = \
+                df["FID"][df['F_IID'] != null_value].map(str) + "_" + \
+                df['F_IID'][df['F_IID'] != null_value]
+            df['M_IID'][df['M_IID'] != null_value] = \
+                df["FID"][df['M_IID'] != null_value].map(str) + "_" + \
+                df['M_IID'][df['M_IID'] != null_value]
+            df['IID'] = df["FID"].map(str) + "_" + df['IID']
+        else:
+            df['F_IID'][~df['F_IID'].isna()] = \
+                df["FID"][~df['F_IID'].isna()].map(str) + "_" + \
+                df['F_IID'][~df['F_IID'].isna()].map(str)
+            df['M_IID'][~df['M_IID'].isna()] = \
+                df["FID"][~df['M_IID'].isna()].map(str) + "_" + \
+                df['M_IID'][~df['M_IID'].isna()].map(str)
+            df['IID'] = df["FID"].map(str) + "_" + df['IID'].map(str)
 
-    entries = {id: i for i, id in
-               enumerate([x for x in np.unique(np.concatenate(df[['IID', 'F_IID', 'M_IID']].values)) if '_' in x])}
+        entries = {id: i for i, id in
+                   enumerate([x for x in np.unique(np.concatenate(df[['IID', 'F_IID', 'M_IID']].values)) if '_' in x])}
+    else:
+        entries = {id: i for i, id in
+                   enumerate([x for x in np.unique(np.concatenate(df[['IID', 'F_IID', 'M_IID']].values)) if x])}
     all_ids = np.array(list(entries.keys()))
 
     # get all parent-child edges
