@@ -1,6 +1,6 @@
-scikit-sparse==0.4.3
-scipy==1.1.0
-numpy==1.15.1
-scikit-learn==0.19.2
-pandas==0.23.4
-networkx==2.1
+scikit-sparse>=0.4.3
+scipy>=1.1.0
+numpy>=1.15.1
+scikit-learn>=0.19.2
+pandas>=0.23.4
+networkx>=2.1
