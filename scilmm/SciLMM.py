@@ -166,7 +166,7 @@ def SciLMM(simulate=False, sample_size=100000, sparsity_factor=0.001, gen_exp=1.
             covariance_matrices.append(mat)
 
     if cov is not None:
-        cov = np.hstack((cov, np.load(cov)))
+        cov = np.hstack(np.load(cov))
     else:
         cov = sex[:, np.newaxis]
 
