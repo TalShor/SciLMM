@@ -2,3 +2,5 @@
 *.npy
 *.npz
 *.fam
+.idea*
+.pytest_cache*
