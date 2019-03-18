@@ -138,7 +138,6 @@ def estimate_var_comps(cholesky_func, mats, covariates, y, reml=True, sim_num=10
     if not optObj.success:
         print('optimization failed with message: %s' % optObj.message)
 
-
     mats_coefficients = np.exp(optObj.x)
 
     return mats_coefficients
