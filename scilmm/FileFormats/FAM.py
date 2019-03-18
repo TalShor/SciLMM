@@ -116,7 +116,7 @@ if __name__ == "__main__":
     indices = np.array([1, 2, 3])
     write_fam('temp.fam', rel, sex, indices)
 
-    rel_after, sex_after, interest_after = read_fam('temp.fam')
+    rel_after, sex_after, interest_after, entries_list = read_fam('temp.fam')
     assert (rel_after - rel).nnz == 0
     assert np.count_nonzero(sex - sex_after) == 0
     assert np.count_nonzero(interest_after - indices) == 0
