@@ -4,7 +4,10 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 
-from scilmm.Matrices.Relationship import organize_rel
+try:
+    from scilmm.Matrices.Relationship import organize_rel
+except:
+    from Matrices.Relationship import organize_rel
 
 
 class Pedigree:

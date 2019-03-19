@@ -1,7 +1,7 @@
 import argparse
 
 
-def scilmm_parse_arguments():
+def ibd_compute_parse_arguments():
     parser = argparse.ArgumentParser(description='SciLMM')
 
     # simulation values

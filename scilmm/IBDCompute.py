@@ -2,12 +2,20 @@ import os
 
 import numpy as np
 
-from scilmm.FileFormats.FAM import write_fam
-from scilmm.FileFormats.pedigree import Pedigree
-from scilmm.IBDComputeWrapper import scilmm_parse_arguments
-from scilmm.Matrices.Numerator import simple_numerator
-from scilmm.Matrices.SparseMatrixFunctions import save_sparse_csr
-from scilmm.Simulation.Pedigree import simulate_tree
+try:
+    from scilmm.FileFormats.FAM import write_fam
+    from scilmm.FileFormats.pedigree import Pedigree
+    from scilmm.Matrices.Numerator import simple_numerator
+    from scilmm.Matrices.SparseMatrixFunctions import save_sparse_csr
+    from scilmm.Simulation.Pedigree import simulate_tree
+    from scilmm.IBDComputeWrapper import ibd_compute_parse_arguments
+except:
+    from FileFormats.FAM import write_fam
+    from FileFormats.pedigree import Pedigree
+    from Matrices.Numerator import simple_numerator
+    from Matrices.SparseMatrixFunctions import save_sparse_csr
+    from Simulation.Pedigree import simulate_tree
+    from IBDComputeWrapper import ibd_compute_parse_arguments
 
 
 class IBDCompute:
@@ -73,5 +81,5 @@ class IBDCompute:
 
 
 if __name__ == "__main__":
-    args = scilmm_parse_arguments()
-    ibd_creator = IBDCompute(**args.__dict__)
+    input_arguments = ibd_compute_parse_arguments()
+    ibd_creator = IBDCompute(**input_arguments.__dict__)
