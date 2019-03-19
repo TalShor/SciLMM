@@ -4,7 +4,11 @@ import argparse
 def ibd_compute_parse_arguments():
     parser = argparse.ArgumentParser(description='SciLMM')
 
-    # simulation values
+    # General Parameters:
+    parser.add_argument('--output_folder', dest='output_folder', type=str, default='.',
+                        help='which folder it should save the output to.')
+
+    # Pedigree Simulation:
     parser.add_argument('--simulate', dest='simulate', action='store_true', default=False,
                         help='Run simulations')
 
@@ -20,6 +24,8 @@ def ibd_compute_parse_arguments():
     parser.add_argument('--init_keep_rate', dest='init_keep_rate', type=float, default=0.8,
                         help='1 - number of edges to remove before iteration begins')
 
+
+    # IBD Computing matrix:
     parser.add_argument('--fam', dest='fam', type=str, default=None,
                         help='.fam file representing the pedigree. ' +
                              'the phenotype column contains all 0 if everyone is of interest, ' +
@@ -72,8 +78,7 @@ def ibd_compute_parse_arguments():
     #
     # parser.add_argument('--verbose', dest='verbose', action='store_true', default=False,
     #                     help='prints more information along the run.')
-    parser.add_argument('--output_folder', dest='output_folder', type=str, default='.',
-                        help='which folder it should save the output to.')
+
 
     args = parser.parse_args()
 

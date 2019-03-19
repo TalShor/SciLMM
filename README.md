@@ -1,16 +1,26 @@
 # Sci-LMM
-Sparse Cholesky factorIzation Linear Mixed model
+Sparse Cholesky factorIzation Linear Mixed Model.
 
+Sci-LMM is a modeling framework for studying population-scale family trees that combines techniques from the animal and plant breeding literature and from human genetics literature. 
+The framework can construct a matrix of relationships between trillions of pairs of individuals and fit the corresponding Linear Mixed Models. 
+Sci-LMM provides a unified framework for investigating the epidemiological history of human populations via genealogical records.
 
-## Parameters
+## Usage
+The code has two separate programs:
+- Identity By Descent (IBD) computing: used to compute a correlation matrix from a pedigree. 
+- Sparse Cholesky: used to fit a linear mixed model from given IBD matrices and covariate matrices to phenotypes.
 
-### General parameters
-`--verbose` - prints more information along the run.
+## Identity By Descent computing
+In order to run this you can either use the `IBDCompute` class, or run from terminal `python IBDCompute.py [args]`. 
+
+### Parameters
+
+#### General parameters
 
 `--output_folder OUTPUT_FOLDER` - which folder it should save the output to.
 
 
-### Pedigree simulation
+#### Pedigree simulation
 `--simulate` - Run simulations
 
 `--sample_size SAMPLE_SIZE` - Size of the cohort
@@ -21,39 +31,25 @@ Sparse Cholesky factorIzation Linear Mixed model
 
 `--init_keep_rate INIT_KEEP_RATE` - 1 - number of edges to remove before iteration begins
 
+
+### IBD computing parameters
 `--fam FAM` - .fam file representing the pedigree. the phenotype column contains all 0 if everyone is of interest, or if only a subset is of interest the're phenotype will contain 1
 
+`--remove_cycles` - Remove cycles from relationship matrix. WARNING: there should no be any cycles. All nodes in cycles will be removed.
 
-### Create covariance matrices
-`--IBD` - Create IBD matrix
+`--remove_access_parents` - Remove relations of nodes with too many parents. WARNING: All individuals should have no more than 2 parents. Access edges will be removed, not nodes.'
 
-`--Epistasis` - Create pairwise-epistasis matrix
+## Sparse Cholesky
+In order to run this section run from terminal `python SparseCholesky.py [args]`.
 
-`--Dominance` - Create dominance matrix
+### Parameters
+`--A` - A path of an IBD matrix in .mm form.
 
-`--IBD_exists` - existence of the .npz file for the IBD matrix (if you already had build the matrix via the --IBD option)
+`--phe` - A path of a table with phenotypes (columns should be id and phenotype with no header).
 
-`--Epis_exists` - existence of the .npz file for the Epistasis matrix (if you already had build the matrix via the --Epistasis option)
+`--cov` - A path of covariate matrix. Should have no header. 
 
-`--Dom_exists` - existence of the .npz file for the Dominance matrix (if you already had build the matrix via the --Dominance option)
-
-
-### Estimation
-`--generate_y` - Generate a random y
-
-`--y Y` - the phenotype (npy file containing an n sized numpy array)
-
-`--covariates COV` - the covaraites, not including sex (npy file containing an nxc sized numpy array)
-
-`--HE` - Estimate fixed effects and covariance coefficients via Haseman-Elston
-
-`--LMM` - Estimate fixed effects and covariance coefficients via Linear mixed models
-
-`--REML` - Use REML instead of simple maximum likelihood
-
-`--sim_num SIM_NUM` - Number of simulated vectors
-
-`--fit_intercept` - Use an intercept as a covariate
+`--reml` - If added uses the REML method instead of Haseman-Elston.
 
 
 ## Test the system
