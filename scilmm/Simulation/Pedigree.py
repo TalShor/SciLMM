@@ -5,8 +5,12 @@ import numpy as np
 from scipy.optimize import fmin
 from scipy.sparse import csr_matrix, triu
 
-from scilmm.Matrices.Relationship import count_IBD_nonzero
-from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr
+try:
+    from scilmm.Matrices.Relationship import count_IBD_nonzero
+    from scilmm.Matrices.SparseMatrixFunctions import load_sparse_csr
+except:
+    from Matrices.Relationship import count_IBD_nonzero
+    from Matrices.SparseMatrixFunctions import load_sparse_csr
 
 
 # number of individuals per generation so that each generation is gen_exp bigger than the previous

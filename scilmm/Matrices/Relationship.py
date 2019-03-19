@@ -24,7 +24,7 @@ def topo_sort(rel, remove_cycles=False, check_num_parents=False):
             graph.remove_nodes_from(list(nx.isolates(graph)))
     if check_num_parents:
         nodes_with_access_parents = list(map(lambda x: x[0], (filter(lambda x: x[1] > 2, graph.out_degree()))))
-        if len(nodes_with_access_parents)>0:
+        if len(nodes_with_access_parents) > 0:
             edges_to_remove = np.vstack(np.array(list(
                 map(lambda child: np.array(list(map(lambda succ: (child, succ), list(graph.successors(child))))),
                     nodes_with_access_parents))))
