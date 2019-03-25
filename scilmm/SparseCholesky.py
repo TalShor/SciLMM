@@ -353,7 +353,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     A = mmread(args.A).tocsr()
-    df_cov = pd.read_table(args.cov, index_col=[0, 1], header=None)
+    df_cov = pd.read_table(args.cov, index_col=[0, 1]) # In Omer's code this is None
     df_phe = pd.read_table(args.phe, squeeze=True, header=None, usecols=[2])
     is_empty = np.asarray(A.sum(axis=1))[:, 0] == 1
     if is_empty.sum() > 0:
@@ -371,5 +371,7 @@ if __name__ == '__main__':
 
     if args.reml:
         reml_d = REML(SparseCholesky(), [A], cov, y, verbose=True)
+        print(f"reml d are {reml_d}")
     else:
         he_est = HE(SparseCholesky(), [A], cov, y, compute_stderr=True)
+        print(f"HE estimates are {he_est}")
