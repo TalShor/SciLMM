@@ -2,7 +2,7 @@ import argparse
 
 
 def ibd_compute_parse_arguments():
-    parser = argparse.ArgumentParser(description='SciLMM')
+    parser = argparse.ArgumentParser(description='scilmm')
 
     # General Parameters:
     parser.add_argument('--output_folder', dest='output_folder', type=str, default='.',

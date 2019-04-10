@@ -155,10 +155,10 @@ def compute_hess(mats, covariates, factor, y):
 
     Py = P(y)
     hess = np.empty((num_matrices, num_matrices))
-    for j in xrange(num_matrices):
+    for j in range(num_matrices):
         Hj_Py = mats[j].dot(Py)
         P_Hj_Py = P(Hj_Py)
-        for i in xrange(j + 1):
+        for i in range(j + 1):
             Hi_P_Hj_Py = mats[i].dot(P_Hj_Py)
             P_Hi_P_Hj_Py = P(Hi_P_Hj_Py)
             hess[i, j] = -0.5 * y.dot(P_Hi_P_Hj_Py)
@@ -210,7 +210,7 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
             else:
                 q[i] = ((mat_i * y).T.dot(y)).sum() - np.diag(mat_i).dot(y ** 2)
             for j, mat_j in enumerate(mat_list):
-                if (j > i): continue
+                if j > i: continue
                 if scipy.sparse.issparse(mat_i):
                     S[i, j] = (mat_i.multiply(mat_j)).sum() - mat_i.diagonal().dot(mat_j.diagonal())
                 else:
@@ -225,7 +225,7 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
         for i, mat_i in enumerate(mat_list):
             q[i] = (y.dot(mat_i.dot(y)) - y.dot(y))  # / float(n-1)**2
             for j, mat_j in enumerate(mat_list):
-                if (j > i): continue
+                if j > i: continue
                 S[i, j] = ((mat_i.multiply(mat_j)).sum() - (n - 1))  # / float(n-1)**2
                 S[j, i] = S[i, j]
 
@@ -248,7 +248,7 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
             HAi_min_I = H.dot(mat_i) - H
         for j, mat_i in enumerate(mat_list[:i + 1]):
             if sim_num is None:
-                if (j == i):
+                if j == i:
                     HAj_min_I = HAi_min_I
                 else:
                     HAj_min_I = H.dot(mat_j) - H
@@ -313,13 +313,6 @@ def MINQUE(cholesky_func, mat_list, cov, y, compute_stderr=False, verbose=False,
                     S[i, j] = np.mean(np.einsum('ij,ij->j', invH_simy, Kj_invH_Ki_invH_simy)) - (n - 1)
                 S[j, i] = S[i, j]
 
-            # #handle last matrix (M = I - np.outer(np.ones(n), np.ones(n))/n)
-            # q[-1] = 0
-            # S[-1, -1] = (n-1) - (n-1)
-            # for i, mat_i in enumerate(mat_list):
-            # S[i,-1] = mat_i.diagonal().sum() - mat_i.sum()/float(n) - (n-1)
-            # S[-1, i] = S[i, -1]
-
         # compute minque_est
         minque_est = np.linalg.solve(S, q)
         print(iter_num + 1, minque_est)
@@ -342,26 +335,24 @@ def MINQUE(cholesky_func, mat_list, cov, y, compute_stderr=False, verbose=False,
     return he_est, np.sqrt(var_he_est)
 
 
-if __name__ == '__main__':
-    import argparse
+def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
+    # Sort shared indices between matrices:
+    if not ignore_indices:
+        indices = list(set(df_cov.index) & set(df_phe.index) & set(A.indices))
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--A', required=True)
-    parser.add_argument('--phe', required=True)
-    parser.add_argument('--cov', default=None)
-    parser.add_argument('--reml', default=False, action='store_true')
-    args = parser.parse_args()
+        # Sort all objects in the same order by IIDs
+        df_cov = df_cov.loc[indices]
+        df_phe = df_phe.loc[indices]
+        A = A[indices][:, indices]
 
-    A = mmread(args.A).tocsr()
-    df_cov = pd.read_table(args.cov, index_col=[0, 1]) # In Omer's code this is None
-    df_phe = pd.read_table(args.phe, squeeze=True, header=None, usecols=[2])
-    is_empty = np.asarray(A.sum(axis=1))[:, 0] == 1
-    if is_empty.sum() > 0:
-        A = A[~is_empty][:, ~is_empty]
-        A.eliminate_zeros()
-        df_cov = df_cov.loc[~is_empty]
-        df_phe = df_phe.loc[~is_empty]
-    y = df_phe.values
+    # Remove individuals who have no family relationships in the data
+    has_relatives = np.asarray(A.sum(axis=1))[:, 0] > 1
+    if any(~has_relatives):
+        A = A[has_relatives][:, has_relatives]
+    A.eliminate_zeros()
+    df_cov = df_cov.loc[has_relatives]
+    df_phe = df_phe.loc[has_relatives]
+    y = df_phe.values.reshape(-1)
 
     # standardize covariates (for numerical stability)
     df_cov['intercept'] = 1
@@ -369,9 +360,43 @@ if __name__ == '__main__':
     cov[:, :-1] -= cov[:, :-1].mean(axis=0)
     cov[:, :-1] /= cov[:, :-1].std(axis=0)
 
-    if args.reml:
+    if reml:
         reml_d = REML(SparseCholesky(), [A], cov, y, verbose=True)
-        print(f"reml d are {reml_d}")
+        print(f"reml d are {reml_d[0]} and {reml_d[1]}")
     else:
         he_est = HE(SparseCholesky(), [A], cov, y, compute_stderr=True)
-        print(f"HE estimates are {he_est}")
+        print(f"HE estimates are {he_est[0]} and {he_est[1]}")
+
+
+def run_estimates_from_paths(A, phe, cov, reml=False, ignore_indices=False):
+    A = mmread(A).tocsr()
+    index_col = None if ignore_indices else 0
+    df_cov = pd.read_csv(cov, index_col=index_col)
+    df_phe = pd.read_csv(phe, header=None, index_col=index_col)
+    run_estimates(A, df_phe, df_cov, reml=reml, ignore_indices=ignore_indices)
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--A', required=True,
+                        help="Absolute path of the covariance matrix A. This matrix should be saved as an mmatrix.")
+    parser.add_argument('--phe', required=True,
+                        help="Absolute path of phenotype CSV file with no header."
+                             " This file should consist of two columns: IID and Phenotype."
+                             " In case of 'ignore_indices'=True there should only be one column of phenotype.")
+    parser.add_argument('--cov', required=True,
+                        help="Absolute path of covariates CSV file with a header."
+                             " This file should contain all covariates that "
+                             "should be taken into account in calculation."
+                             " Notice that the first column should be the IID, unless the 'ignore_indices'"
+                             " flag is given at which case the column should not appear.")
+    parser.add_argument('--reml', default=False, action='store_true',
+                        help="Compute using REML, default case uses the HE estimation method.")
+    parser.add_argument('--ignore_indices', default=False, action='store_true',
+                        help="Ignore indices of individuals."
+                             " This assumes that the A matrix, phenotype matrix and "
+                             "covariates matrix are all ordered in the same order of individuals.")
+    args = parser.parse_args()
+
+    run_estimates_from_paths(**(args.__dict__))

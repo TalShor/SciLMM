@@ -10,12 +10,12 @@ try:
     from scilmm.Simulation.Pedigree import simulate_tree
     from scilmm.IBDComputeWrapper import ibd_compute_parse_arguments
 except:
-    from FileFormats.FAM import write_fam
-    from FileFormats.pedigree import Pedigree
-    from Matrices.Numerator import simple_numerator
-    from Matrices.SparseMatrixFunctions import save_sparse_csr
-    from Simulation.Pedigree import simulate_tree
-    from IBDComputeWrapper import ibd_compute_parse_arguments
+    from .FileFormats.FAM import write_fam
+    from .FileFormats.pedigree import Pedigree
+    from .Matrices.Numerator import simple_numerator
+    from .Matrices.SparseMatrixFunctions import save_sparse_csr
+    from .Simulation.Pedigree import simulate_tree
+    from .IBDComputeWrapper import ibd_compute_parse_arguments
 
 
 class IBDCompute:
