@@ -349,9 +349,9 @@ def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
     has_relatives = np.asarray(A.sum(axis=1))[:, 0] > 1
     if any(~has_relatives):
         A = A[has_relatives][:, has_relatives]
+        df_cov = df_cov.loc[has_relatives]
+        df_phe = df_phe.loc[has_relatives]
     A.eliminate_zeros()
-    df_cov = df_cov.loc[has_relatives]
-    df_phe = df_phe.loc[has_relatives]
     y = df_phe.values.reshape(-1)
 
     # standardize covariates (for numerical stability)
