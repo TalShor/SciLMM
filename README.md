@@ -7,7 +7,7 @@ Sci-LMM provides a unified framework for investigating the epidemiological histo
 
 ## Usage
 The code has two separate programs:
-- Identity By Descent (IBD) computing: used to compute a correlation matrix from a pedigree. 
+- Identity By Descent (IBD) computing: used to compute a kinship matrix from a pedigree. 
 - Sparse Cholesky: used to fit a linear mixed model from given IBD matrices and covariate matrices to phenotypes.
 
 ## Identity By Descent computing
@@ -59,4 +59,4 @@ For anything bigger than 200K-250K individuals, I prefer HE. It's really really 
 
 Creating IBD matrices for 2-3 million individuals works great, from some reason - 11 million involves large numerical errors - will update on this when I understand this better.
 
-If needed, please contact Tal Shor at talihow@gmail.com.
+If needed, please contact Iris Kalka at iris.kalka@weizmann.ac.il.
