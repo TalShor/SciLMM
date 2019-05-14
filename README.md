@@ -52,6 +52,11 @@ In order to run this section run from terminal `python SparseCholesky.py [args]`
 `--reml` - If added uses the REML method instead of Haseman-Elston.
 
 
+## Usage Examples
+We highly reccomend that you look at our tests - these include some basic usage examples. 
+In test_IBDCompute you can find usage examples for computing the Identity By Descent matrix. 
+In test_SparseCholesky you can find a usage of both sections combined. If you want to learn how to run the estimates without computing the IBD (e.g. if you used the Nadiv package to compute the IBD), try running the test example to better understand what the code requires.
+
 ## Tips
 Creating IBD matrix can also be done using R's Nadiv package.
 
