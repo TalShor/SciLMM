@@ -332,7 +332,7 @@ def MINQUE(cholesky_func, mat_list, cov, y, compute_stderr=False, verbose=False,
     # var_he_est = np.linalg.solve(S, np.linalg.solve(S, V_q).T).T
     var_he_est = 0
 
-    return he_est, np.sqrt(var_he_est)
+    return minque_est, np.sqrt(var_he_est)
 
 
 def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
@@ -374,6 +374,7 @@ def run_estimates_from_paths(A, phe, cov, reml=False, ignore_indices=False):
     df_cov = pd.read_csv(cov, index_col=index_col)
     df_phe = pd.read_csv(phe, header=None, index_col=index_col)
     run_estimates(A, df_phe, df_cov, reml=reml, ignore_indices=ignore_indices)
+
 
 if __name__ == '__main__':
     import argparse

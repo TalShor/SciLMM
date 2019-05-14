@@ -12,7 +12,7 @@ except:
 
 class Pedigree:
     def __init__(self, pedigree=None, delimiter=' ', null_value='0', female_value='2', check_num_parents=True,
-                 remove_cycles=True):
+                 remove_cycles=True, **kwargs):
         """
         Creates a Pedigree class instance.
         :param pedigree: A pedigree instance. If needs to be loaded later keep value as None.
@@ -101,8 +101,8 @@ class Pedigree:
             self.get_entries()
             self.__dict__['child_' + parent] = np.array(
                 [[self.entries[child], self.entries[parent]] for child, parent in
-                 self.family[['IID', 'F_IID']][
-                     self.get_non_null_indices(self.family['F_IID'])].values])
+                 self.family[['IID', parent.upper()[0]+'_IID']][
+                     self.get_non_null_indices(self.family[parent.upper()[0]+'_IID'])].values])
         return getattr(self, 'child_' + parent)
 
     def get_all_parent_child_edges(self):
@@ -122,6 +122,7 @@ class Pedigree:
         """
         if self.relationship is None:
             all_co = self.get_all_parent_child_edges()
+            assert len(all_co) > 0, IOError("There are no family connections in the database")
             all_ids = np.array(list(self.get_entries().keys()))
             self.relationship = csr_matrix((np.ones(all_co.shape[0]), (all_co[:, 0], all_co[:, 1])),
                                            shape=(all_ids.size, all_ids.size), dtype=np.bool)

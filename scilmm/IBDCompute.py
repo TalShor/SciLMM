@@ -43,7 +43,7 @@ class IBDCompute:
             assert hasattr(self, 'pedigree'), "In order to compute relationship must first load pedigree either " \
                                               "through a variable to .compute_relationships or through .load_pedigree "
         else:
-            self.pedigree = Pedigree()
+            self.pedigree = Pedigree(self.kwargs)
             self.pedigree.load_pedigree(pedigree_file_path)
             self.pedigree.compute_all_values()
         entries_list = np.array(list(self.pedigree.entries_dict.values()))[self.pedigree.interest]
@@ -72,12 +72,17 @@ class IBDCompute:
         return self.compute_relationships(os.path.join(self.output_folder, "rel.fam"))
 
     def compute_ibd(self):
+        """
+        Computes the imb, L and D matrices
+        :return: ibd, L, D matrices
+        """
         _, entries_list = self.compute_relationships()
         ibd, L, D = simple_numerator(self.pedigree.relationship)
         # keep the original L and D because they are useless otherwise
         save_sparse_csr(os.path.join(self.output_folder, "IBD.npz"), ibd)
         save_sparse_csr(os.path.join(self.output_folder, "L.npz"), L)
         save_sparse_csr(os.path.join(self.output_folder, "D.npz"), D)
+        return ibd, L, D
 
 
 if __name__ == "__main__":
