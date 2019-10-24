@@ -5,6 +5,7 @@ import pandas as pd
 import scipy.linalg as la
 import scipy.optimize as optimize
 import scipy.sparse
+import scipy.sparse as sparse
 from scipy.io import mmread
 from sksparse.cholmod import cholesky as sk_cholesky
 
@@ -188,7 +189,7 @@ def REML(cholesky_func, mats, covariates, y, reml=True, sim_num=100, verbose=Fal
             "covariance std": sigmas_sigmas}
 
 
-def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, compute_stderr=False):
+def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, compute_stderr=False, y2=None):
     # regress all covariates out of y
     CTC = cov.T.dot(cov)
     y = y - cov.dot(np.linalg.solve(CTC, cov.T.dot(y)))
@@ -197,9 +198,21 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
     y /= y.std()
     # assert np.isclose(y.mean(), 0)
     # assert np.isclose(y.var(), 1)
-    K = len(mat_list)
+    
+    if y2 is not None:
+        y2 -= cov.dot(np.linalg.solve(CTC, cov.T.dot(y2)))
+        y2 /= y2.std()
+        y = np.concatenate((y, y2))
+        
+        for m_i, m in enumerate(mat_list):
+            z = sparse.csr_matrix((m.shape[0], m.shape[0]))
+            mz = sparse.hstack([m,z])
+            zm = sparse.hstack([z,m])
+            mat_list[m_i] = sparse.vstack([zm, mz]).tocsr()
+            
 
     # construct S and q, without MQS
+    K = len(mat_list)
     if not MQS:
         q = np.zeros(K)
         S = np.zeros((K, K))
@@ -335,7 +348,7 @@ def MINQUE(cholesky_func, mat_list, cov, y, compute_stderr=False, verbose=False,
     return minque_est, np.sqrt(var_he_est)
 
 
-def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
+def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False, df_phe2=None):
     # Sort shared indices between matrices:
     if not ignore_indices:
         indices = list(set(df_cov.index) & set(df_phe.index) & set(A.indices))
@@ -343,6 +356,8 @@ def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
         # Sort all objects in the same order by IIDs
         df_cov = df_cov.loc[indices]
         df_phe = df_phe.loc[indices]
+        if df_phe2 is not None:
+            df_phe2 = df_phe2.loc[indices]
         A = A[indices][:, indices]
 
     # Remove individuals who have no family relationships in the data
@@ -351,8 +366,17 @@ def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
         A = A[has_relatives][:, has_relatives]
         df_cov = df_cov.loc[has_relatives]
         df_phe = df_phe.loc[has_relatives]
+        if df_phe2 is not None:
+            df_phe2 = df_phe2.loc[has_relatives]
     A.eliminate_zeros()
     y = df_phe.values.reshape(-1)
+    if df_phe2 is not None:
+        y2 = df_phe2.values.reshape(-1)
+        assert not reml
+    else:
+        y2 = None
+        
+    
 
     # standardize covariates (for numerical stability)
     if type(df_cov) == pd.Series:
@@ -367,7 +391,7 @@ def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False):
         print(f"reml d are {reml_d[0]} and {reml_d[1]}")
         return reml_d
     else:
-        he_est = HE(SparseCholesky(), [A], cov, y, compute_stderr=True)
+        he_est = HE(SparseCholesky(), [A], cov, y, compute_stderr=True, y2=y2)
         print(f"HE estimates are {he_est[0]} and {he_est[1]}")
         return he_est
 
