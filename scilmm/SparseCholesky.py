@@ -213,6 +213,7 @@ def HE(mat_list, cov, y, MQS=False, verbose=False, sim_num=100, compute_stderr=F
 
     # construct S and q, without MQS
     K = len(mat_list)
+    n = y.shape[0]
     if not MQS:
         q = np.zeros(K)
         S = np.zeros((K, K))
@@ -231,8 +232,7 @@ def HE(mat_list, cov, y, MQS=False, verbose=False, sim_num=100, compute_stderr=F
                 S[j, i] = S[i, j]
 
     # construct S and q with MQS (it's almost the same thing...)
-    else:
-        n = y.shape[0]
+    else:        
         q = np.zeros(K)
         S = np.zeros((K, K))
         for i, mat_i in enumerate(mat_list):
