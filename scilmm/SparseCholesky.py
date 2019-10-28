@@ -118,7 +118,7 @@ def bolt_gradient_estimation(log_sig2g_array, cholesky_func, mats, covariates, y
 
 
 def estimate_var_comps(cholesky_func, mats, covariates, y, reml=True, sim_num=100, verbose=True, aireml=False):
-    he_est = HE(cholesky_func, mats[:-1], covariates, y, compute_stderr=False)
+    he_est = HE(mats[:-1], covariates, y, compute_stderr=False)
     he_est = np.concatenate((he_est, [1 - he_est.sum()]))
     x0 = he_est
     if np.any(x0 < 0):
@@ -189,7 +189,7 @@ def REML(cholesky_func, mats, covariates, y, reml=True, sim_num=100, verbose=Fal
             "covariance std": sigmas_sigmas}
 
 
-def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, compute_stderr=False, y2=None):
+def HE(mat_list, cov, y, MQS=False, verbose=False, sim_num=100, compute_stderr=False, y2=None):
     # regress all covariates out of y
     CTC = cov.T.dot(cov)
     y = y - cov.dot(np.linalg.solve(CTC, cov.T.dot(y)))
@@ -230,7 +230,7 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
                     S[i, j] = np.einsum('ij,ij->', mat_i, mat_j) - np.diag(mat_i).dot(np.diag(mat_j))
                 S[j, i] = S[i, j]
 
-                # construct S and q with MQS (it's almost the same thing...)
+    # construct S and q with MQS (it's almost the same thing...)
     else:
         n = y.shape[0]
         q = np.zeros(K)
@@ -268,7 +268,6 @@ def HE(cholesky_func, mat_list, cov, y, MQS=True, verbose=False, sim_num=100, co
                 V_q[i, j] = 2 * (HAi_min_I.multiply(HAj_min_I)).sum()  # / float(n-1)**4
             else:
                 # simulate vectors
-                assert cholesky_func is not None
                 sim_y = np.random.randn(n, sim_num)
                 Aj_minI_y = mat_j.dot(sim_y) - sim_y
                 H_Aj_minI_y = H.dot(Aj_minI_y)
@@ -391,7 +390,7 @@ def run_estimates(A, df_phe, df_cov, reml=False, ignore_indices=False, df_phe2=N
         print(f"reml d are {reml_d[0]} and {reml_d[1]}")
         return reml_d
     else:
-        he_est = HE(SparseCholesky(), [A], cov, y, compute_stderr=True, y2=y2)
+        he_est = HE([A], cov, y, compute_stderr=True, y2=y2)
         print(f"HE estimates are {he_est[0]} and {he_est[1]}")
         return he_est
 
